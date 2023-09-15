@@ -54,8 +54,8 @@ class TileGrid:
     def show_image(self, s):
         s.blit(self.image, (0, 0))
         # type: ignore
-        pygame.draw.rect(s, "black", (WIDTH-WIDTH//self.rows, WIDTH -
-                         WIDTH//self.rows, WIDTH//self.rows, WIDTH//self.rows))
+        pygame.draw.rect(s, (0, 0, 0), (WIDTH-WIDTH//self.rows, WIDTH -
+                                        WIDTH//self.rows, WIDTH//self.rows, WIDTH//self.rows))
         pygame.display.update()
 
     def return_values(self):
@@ -103,7 +103,7 @@ class TileGrid:
         for i in range(num_len):
             rand = randint(0, num_len-1-i)
             self.arr[i//self.rows].append(Tile(nums[rand], (i % self.rows)*WIDTH//self.rows,
-                                          (i // self.rows)*WIDTH//self.rows, self.rows, self.images))
+                                               (i // self.rows)*WIDTH//self.rows, self.rows, self.images))
             self.arr_values[i//self.rows].append(nums[rand])
             if nums[rand] == (self.rows*self.rows)-1:
                 self.empty_pos = (i//self.rows, i % self.rows)
@@ -135,7 +135,7 @@ class Tile:
             self.image = self.images[self.val]
         self.rect = pygame.Rect(self.x, self.y, WIDTH //
                                 self.rows, WIDTH//self.rows)
-        self.colour = 'black'
+        self.colour = (0, 0, 0)
 
     def update_val(self, val: int):
         self.val = val
@@ -145,7 +145,7 @@ class Tile:
             self.image = self.images[self.val]
         except:
             pass
-        self.colour = 'black'
+        self.colour = (0, 0, 0)
 
     def __str__(self):
         return str(self.val)
@@ -164,13 +164,13 @@ def update_display(s, t, rows):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-    s.fill("white")
+    s.fill((255, 255, 255))
     t.draw(s)
     for i in range(1, rows):
         pygame.draw.line(s, (128, 128, 128), (i * WIDTH //
-                         rows, 0), (i * WIDTH//rows, WIDTH))
+                                              rows, 0), (i * WIDTH//rows, WIDTH))
         pygame.draw.line(s, (128, 128, 128), (0, i * WIDTH //
-                         rows), (WIDTH, i * WIDTH//rows))
+                                              rows), (WIDTH, i * WIDTH//rows))
     clock.tick(FPS)
     pygame.display.update()
 
@@ -178,7 +178,7 @@ def update_display(s, t, rows):
 def main():
     running = True
     rows = 3
-    t = TileGrid(rows, 'IntermediateProjects\\TileSlideGame\\rf.jpg')
+    t = TileGrid(rows, 'rf.jpg')
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -197,7 +197,6 @@ def main():
                     print('Game Over')
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    rows = 4
                     t.refresh(rows)
                 if event.key == pygame.K_r:
                     root = tk.Tk()
