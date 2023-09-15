@@ -4,12 +4,14 @@ from PIL import Image
 import tkinter as tk
 from tkinter.simpledialog import askstring
 
+# Initiating pygame
 pygame.init()
-# rows = cols = 3
 WIDTH = HEIGHT = 900
 FPS = 240
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
+
+# Class that holds grid of individual slots
 
 
 class TileGrid:
@@ -19,14 +21,19 @@ class TileGrid:
         nums = [n for n in range(self.rows * self.rows)]
         num_len = len(nums)
         self.num_len = num_len
+        # Setting up the grid by making two 2D arrays
+        # self.arr stores the tile objects
+        # self.arr_values stores the tile position value in relation to which part of the image it is
         self.arr = [[] for _ in range(self.rows)]
         self.arr_values = [[] for _ in range(self.rows)]
         self.images = self.make_image_list()
         for i in range(num_len):
+            # picking a random number to index from the image list
             rand = randint(0, num_len-1-i)
             self.arr[i//self.rows].append(Tile(nums[rand], (i %
                                                             self.rows)*WIDTH//self.rows, (i // self.rows)*WIDTH//self.rows, self.rows, self.images))
             self.arr_values[i//self.rows].append(nums[rand])
+            # storing the position of the empty tile
             if nums[rand] == (self.rows*self.rows)-1:
                 self.empty_pos = (i//self.rows, i % self.rows)
             nums.pop(rand)
@@ -35,6 +42,7 @@ class TileGrid:
         return self.num_len
 
     def make_image_list(self):
+        # makes the list of images to assign to tiles
         images = []
         image = Image.open(self.image_path)
         self.image = pygame.image.fromstring(image.resize(
@@ -52,6 +60,7 @@ class TileGrid:
         return images
 
     def show_image(self, s):
+        # function to show the original image when a key is pressed
         s.blit(self.image, (0, 0))
         # type: ignore
         pygame.draw.rect(s, (0, 0, 0), (WIDTH-WIDTH//self.rows, WIDTH -
@@ -59,6 +68,7 @@ class TileGrid:
         pygame.display.update()
 
     def return_values(self):
+        # returns an array of the values of each tile
         self.arr_values = [[] for _ in range(self.rows)]
         for i, v in enumerate(self.arr):
             for j in v:
@@ -66,6 +76,7 @@ class TileGrid:
         return self.arr_values
 
     def swap(self, i1: int, j1: int):
+        # swaps two tiles and updates the position of the empty tile
         i2, j2 = self.empty_pos
         v1 = self.arr[i1][j1].return_value()[0]
         v2 = self.arr[i2][j2].return_value()[0]
@@ -74,6 +85,7 @@ class TileGrid:
         self.arr[i2][j2].update_val(v1)
 
     def get_neighbours(self, i: int, j: int):
+        # creates a list which contains all the neighbouring tiles
         neighbours = []
         if i == 0:
             neighbours.append(self.arr[i+1][j])
@@ -92,6 +104,7 @@ class TileGrid:
         return neighbours
 
     def refresh(self, rows=-1):
+        # randomises the puzzle with an option to change the number of rows
         if rows != -1:
             self.rows = rows
         nums = [n for n in range(self.rows * self.rows)]
@@ -124,6 +137,8 @@ class TileGrid:
                     return False
         return True
 
+# class of the individual tile
+
 
 class Tile:
     def __init__(self, val: int, x: int, y: int, rows: int, images):
@@ -154,6 +169,7 @@ class Tile:
         return self.val, self.x, self.y
 
     def draw(self, s):
+        # checks if the value corresponds to the empty tile
         if self.val != (self.rows*self.rows)-1:
             s.blit(self.image, (self.x, self.y))
         else:
@@ -165,7 +181,9 @@ def update_display(s, t, rows):
         if event.type == pygame.QUIT:
             pygame.quit()
     s.fill((255, 255, 255))
+    # drawing all the tiles
     t.draw(s)
+    # drawing grid lines
     for i in range(1, rows):
         pygame.draw.line(s, (128, 128, 128), (i * WIDTH //
                                               rows, 0), (i * WIDTH//rows, WIDTH))
@@ -185,6 +203,7 @@ def main():
                 running = False
                 pygame.quit()
             if pygame.mouse.get_pressed()[0]:
+                # calculates position of tile clicked
                 x, y = pygame.mouse.get_pos()
                 j = x // (WIDTH//rows)
                 i = y // (WIDTH//rows)
@@ -199,6 +218,7 @@ def main():
                 if event.key == pygame.K_SPACE:
                     t.refresh(rows)
                 if event.key == pygame.K_r:
+                    # brings up box to input change for amount of rows
                     root = tk.Tk()
 
                     new_rows = tk.StringVar()
@@ -234,6 +254,7 @@ def main():
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
+            # checks while the up arrow is held down to show the original image
             t.show_image(screen)
         else:
             update_display(screen, t, rows)
