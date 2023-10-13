@@ -21,22 +21,7 @@ class TileGrid:
         nums = [n for n in range(self.rows * self.rows)]
         num_len = len(nums)
         self.num_len = num_len
-        # Setting up the grid by making two 2D arrays
-        # self.arr stores the tile objects
-        # self.arr_values stores the tile position value in relation to which part of the image it is
-        self.arr = [[] for _ in range(self.rows)]
-        self.arr_values = [[] for _ in range(self.rows)]
-        self.images = self.make_image_list()
-        for i in range(num_len):
-            # picking a random number to index from the image list
-            rand = randint(0, num_len-1-i)
-            self.arr[i//self.rows].append(Tile(nums[rand], (i %
-                                                            self.rows)*WIDTH//self.rows, (i // self.rows)*WIDTH//self.rows, self.rows, self.images))
-            self.arr_values[i//self.rows].append(nums[rand])
-            # storing the position of the empty tile
-            if nums[rand] == (self.rows*self.rows)-1:
-                self.empty_pos = (i//self.rows, i % self.rows)
-            nums.pop(rand)
+        self.refresh()
 
     def __len__(self):
         return self.num_len
@@ -107,6 +92,9 @@ class TileGrid:
         # randomises the puzzle with an option to change the number of rows
         if rows != -1:
             self.rows = rows
+        # Setting up the grid by making two 2D arrays
+        # self.arr stores the tile objects
+        # self.arr_values stores the tile position value in relation to which part of the image it is
         nums = [n for n in range(self.rows * self.rows)]
         num_len = len(nums)
         self.num_len = num_len
@@ -114,20 +102,24 @@ class TileGrid:
         self.arr_values = [[] for _ in range(self.rows)]
         self.images = self.make_image_list()
         for i in range(num_len):
+            # picking a random number to index from the image list
             rand = randint(0, num_len-1-i)
             self.arr[i//self.rows].append(Tile(nums[rand], (i % self.rows)*WIDTH//self.rows,
                                                (i // self.rows)*WIDTH//self.rows, self.rows, self.images))
             self.arr_values[i//self.rows].append(nums[rand])
+            # storing the position of the empty tile
             if nums[rand] == (self.rows*self.rows)-1:
                 self.empty_pos = (i//self.rows, i % self.rows)
             nums.pop(rand)
 
     def draw(self, s):
+        # loops through all the tiles and calls each of their draw functions
         for i in self.arr:
             for j in i:
                 j.draw(s)
 
     def check_game_over(self):
+        # checks if each tiles value is greater than the one before it and if so the game is over
         holder = -1
         for i, v in enumerate(self.return_values()):
             for j, b in enumerate(v):
@@ -142,6 +134,7 @@ class TileGrid:
 
 class Tile:
     def __init__(self, val: int, x: int, y: int, rows: int, images):
+        # val stores the positional value of the tile
         self.val = val
         self.x, self.y = x, y
         self.rows = rows
@@ -153,6 +146,7 @@ class Tile:
         self.colour = (0, 0, 0)
 
     def update_val(self, val: int):
+        # updates the positional value of the tile and the pygame rect that is drawn
         self.val = val
         self.rect = pygame.Rect(self.x, self.y, WIDTH //
                                 self.rows, WIDTH//self.rows)
@@ -196,23 +190,27 @@ def update_display(s, t, rows):
 def main():
     running = True
     rows = 3
+    # the image used can be changed here
     t = TileGrid(rows, 'rf.jpg')
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # checks if the close button is pressed
                 running = False
                 pygame.quit()
             if pygame.mouse.get_pressed()[0]:
                 # calculates position of tile clicked
+                # x and y are the pixel coordinates of the mouse
                 x, y = pygame.mouse.get_pos()
+                # i and j are the array positions of the tile clicked
                 j = x // (WIDTH//rows)
                 i = y // (WIDTH//rows)
                 n = t.get_neighbours(i, j)
                 for _, v in enumerate(n):
+                    # checks if the empty tile is a neighbour of the pressed tile and if so switch them
                     if v.return_value()[0] == len(t)-1:
                         t.swap(i, j)
                 if t.check_game_over():
-                    # t.game_over()
                     print('Game Over')
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
